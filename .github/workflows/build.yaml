@@ -15,7 +15,9 @@ jobs:
       - uses: DeterminateSystems/nix-installer-action@main
       - uses: DeterminateSystems/magic-nix-cache-action@main
       - uses: DeterminateSystems/flake-checker-action@main
-      - name: Run `nix build`
-        run: nix build .
+      - name: Install dependencies
+        run: poetry install
+        shell: nix develop --command bash -e {0}
       - name: Run tests
-        run: nix run .#tests
+        run: poetry run pytest
+        shell: nix develop --command bash -e {0}
