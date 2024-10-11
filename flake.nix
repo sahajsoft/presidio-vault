@@ -21,61 +21,20 @@
     flake-utils.lib.eachDefaultSystem (
       system:
       let
-        # see https://github.com/nix-community/poetry2nix/tree/master#api for more functions and examples.
-        myapp =
-          { poetry2nix, lib }:
-          poetry2nix.mkPoetryApplication {
-            projectDir = self;
-            overrides = poetry2nix.overrides.withDefaults (
-              final: super:
-              lib.mapAttrs
-                (
-                  attr: systems:
-                  super.${attr}.overridePythonAttrs (old: {
-                    nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ map (a: final.${a}) systems;
-                  })
-                )
-                {
-                  # https://github.com/nix-community/poetry2nix/blob/master/docs/edgecases.md#modulenotfounderror-no-module-named-packagename
-                  # package = [ "setuptools" ];
-                }
-            );
-          };
+        myAppEnv = pkgs.poetry2nix.mkPoetryEnv { projectDir = self; };
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [
-            poetry2nix.overlays.default
-            (final: _: { myapp = final.callPackage myapp { }; })
-          ];
+          overlays = [ poetry2nix.overlays.default ];
         };
       in
       {
-        packages.default = pkgs.myapp;
         devShells = {
-          # Shell for app dependencies.
-          #
-          #     nix develop
-          #
-          # Use this shell for developing your app.
-          default = pkgs.mkShell { inputsFrom = [ pkgs.myapp ]; };
-
-          # Shell for poetry.
-          #
-          #     nix develop .#poetry
-          #
-          # Use this shell for changes to pyproject.toml and poetry.lock.
-          poetry = pkgs.mkShell { packages = [ pkgs.poetry ]; };
-        };
-        legacyPackages = pkgs;
-        tests = {
-          type = "app";
-          program = ''
-            export POETRY_HOME=${pkgs.poetry}
-            export POETRY_BINARY=${pkgs.poetry}/bin/poetry
-            export POETRY_VIRTUALENVS_IN_PROJECT=true
-            echo "[nix][test] Run presidio-vault tests."
-            poetry run pytest
-          '';
+          default = pkgs.mkShell {
+            buildInputs = [
+              myAppEnv
+              pkgs.poetry
+            ];
+          };
         };
       }
     );
