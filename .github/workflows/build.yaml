@@ -18,7 +18,4 @@ jobs:
       - name: Run `nix build`
         run: nix build .
       - name: Run tests
-        run: |
-          nix develop .#poetry
-          poetry install
-          poetry run pytest
+        run: nix run .#tests
