@@ -5,7 +5,7 @@ on:
   pull_request:
 
 jobs:
-  check:
+  test:
     runs-on: ubuntu-22.04
     permissions:
       id-token: "write"
@@ -21,3 +21,11 @@ jobs:
       - name: Run tests
         run: poetry run pytest
         shell: nix develop --command bash -e {0}
+      - name: Build dist
+        run: poetry build
+        shell: nix develop --command bash -e {0}
+      - name: Save dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/

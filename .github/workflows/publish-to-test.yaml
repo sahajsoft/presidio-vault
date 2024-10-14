@@ -1,0 +1,29 @@
+name: Publish
+
+on:
+  workflow_run:
+    workflows: [Build]
+    types: [completed]
+  # push:
+  #   tags:
+  #     - v**
+
+jobs:
+  publish-pypi:
+    name: Publish to PyPI
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
+    steps:
+    - name: Download all the dists
+      uses: actions/download-artifact@v4
+      with:
+        run-id: ${{ github.event.workflow_run.id }}
+        github-token: ${{ github.token }}
+        name: python-package-distributions
+        path: dist/
+    - name: Publish to TestPyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/
