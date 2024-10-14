@@ -4,9 +4,9 @@ on:
   workflow_run:
     workflows: [Build]
     types: [completed]
-  # push:
-  #   tags:
-  #     - v**
+  push:
+    tags:
+      - v**
 
 jobs:
   publish-pypi:
@@ -23,7 +23,5 @@ jobs:
         github-token: ${{ github.token }}
         name: python-package-distributions
         path: dist/
-    - name: Publish to TestPyPI
+    - name: Publish
       uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        repository-url: https://test.pypi.org/legacy/
