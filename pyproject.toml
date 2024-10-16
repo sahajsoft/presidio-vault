@@ -15,12 +15,6 @@ hvac = "^2.3.0"
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.3"
 
-[tool.pytest.group.dev.ini_options]
-pythonpath = "src"
-addopts = [
-    "--import-mode=importlib",
-]
-
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
